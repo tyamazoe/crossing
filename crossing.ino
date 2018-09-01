@@ -115,11 +115,10 @@ void servoSet(int oldAngle, int newAngle)
 
 void crossingClose()
 {
-  //M5.Lcd.println("Close crossing");
-  //M5.Lcd.fillScreen(BLACK);
   M5.Lcd.fillCircle(100, 100, 50, RED);
   M5.Lcd.fillCircle(240, 100, 50, RED);
-  //M5.Lcd.fillScreen(RED);
+  digitalWrite(LED1_PIN, HIGH);
+  digitalWrite(LED2_PIN, HIGH);
   servoSet(currentAngle, 90);
   currentAngle = 90;
 }
@@ -128,7 +127,6 @@ void crossingOpen()
   delay(1000);
   servoSet(currentAngle, 0);
   currentAngle = 0;
-  //M5.Lcd.fillScreen(BLACK);
   M5.Lcd.fillCircle(100, 100, 50, BLACK);
   M5.Lcd.fillCircle(240, 100, 50, BLACK);
   digitalWrite(LED1_PIN, LOW);
