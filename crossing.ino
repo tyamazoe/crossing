@@ -26,11 +26,11 @@ bool blinker = false;
 int currentAngle = 0;
 
 // Speaker
-/*
+
 #define NOTE_D2 330
 #define NOTE_D3F 340
 #define NOTE_D3 350
-*/
+
 // MP3
 /*
 AudioGeneratorMP3 *mp3;
@@ -134,18 +134,17 @@ void crossingOpen()
 }
 
 void crossingBlink(bool blinker) {
-  //M5.Speaker.setVolume(0);
   if (blinker) {
     M5.Lcd.fillCircle(100, 100, 50, RED);
     M5.Lcd.fillCircle(240, 100, 50, BLACK);
-    //M5.Speaker.tone(442, 10);
+    M5.Speaker.tone(NOTE_D3, 10);
     digitalWrite(LED1_PIN, HIGH);
     digitalWrite(LED2_PIN, LOW);
   }
   else {
     M5.Lcd.fillCircle(100, 100, 50, BLACK);
     M5.Lcd.fillCircle(240, 100, 50, RED);
-    //M5.Speaker.tone(440, 10);
+    M5.Speaker.mute();
     digitalWrite(LED1_PIN, LOW);
     digitalWrite(LED2_PIN, HIGH);
   }
@@ -157,6 +156,7 @@ void setup(){
   delay(500);
   //setupMP3();
   //startMP3();
+  M5.Speaker.setVolume(0);
   
   pinMode(SERVO_PIN, OUTPUT);
   pinMode(LED1_PIN, OUTPUT);
