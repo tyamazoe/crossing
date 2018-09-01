@@ -6,7 +6,7 @@
 //
 #include <M5Stack.h>
 //#include <WiFi.h>
-//#include <Ultrasonic.h>
+#include <Ultrasonic.h>
 /*
 #include "AudioFileSourceSD.h"
 #include "AudioFileSourceID3.h"
@@ -20,7 +20,7 @@
 #define LED1_PIN        (16)
 #define LED2_PIN        (17)
 
-//Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
+Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
 bool closed = false;
 bool blinker = false;
 
@@ -104,15 +104,14 @@ int servoPulse(int angleDegrees)
   return pulseWidth;
 }
 
-void servoSet(int oldAngle, int newAngle) {
+void servoSet(int oldAngle, int newAngle) 
+{
   int pulseWidth;
-  if (oldAngle == newAngle)
-  { 
+  if (oldAngle == newAngle) { 
     return;
   }
-  else if (oldAngle < newAngle)
-  {
-    for (int i = oldAngle; i <= newAngle; i++){
+  else if (oldAngle < newAngle) {
+    for (int i = oldAngle; i <= newAngle; i+=3){
       pulseWidth = servoPulse(i);
       digitalWrite(SERVO_PIN, HIGH);
       delayMicroseconds(pulseWidth);                          
@@ -120,8 +119,7 @@ void servoSet(int oldAngle, int newAngle) {
       delayMicroseconds(20000 - pulseWidth);   
     }
   }
-  else if (oldAngle > newAngle)
-  {
+  else if (oldAngle > newAngle) {
     for (int i = oldAngle; i >= newAngle; i--){
       pulseWidth = servoPulse(i);
       digitalWrite(SERVO_PIN, HIGH);
@@ -132,7 +130,7 @@ void servoSet(int oldAngle, int newAngle) {
   }
 }
 
-/*
+
 void crossingClose()
 {
   //M5.Lcd.println("Close crossing");
@@ -140,22 +138,20 @@ void crossingClose()
   M5.Lcd.fillCircle(100, 100, 50, RED);
   M5.Lcd.fillCircle(240, 100, 50, RED);
   //M5.Lcd.fillScreen(RED);
-  for (int i=0; i<=90; i+=3) {
-    servoSet(i);
-  }
+  servoSet(currentAngle, 90);
+  currentAngle = 90;
 }
 void crossingOpen()
 {
-  for (int i=90; i>=0; i-=3) {
-    servoSet(i);
-  }
+  servoSet(currentAngle, 0);
+  currentAngle = 0;
   //M5.Lcd.fillScreen(BLACK);
   M5.Lcd.fillCircle(100, 100, 50, BLACK);
   M5.Lcd.fillCircle(240, 100, 50, BLACK);
   //digitalWrite(LED1_PIN, LOW);
   //digitalWrite(LED2_PIN, LOW);
 }
-*/
+
 void crossingBlink(bool blinker) {
   //M5.Speaker.setVolume(0);
   if (blinker) {
@@ -195,7 +191,7 @@ void setup(){
 
 void loop(){
   long distance;
-  //distance = UltrasonicRanger.MeasureInCentimeters();
+  distance = UltrasonicRanger.MeasureInCentimeters();
   //distance = 1000;
   /*
   M5.Lcd.print(closed);
@@ -203,15 +199,18 @@ void loop(){
   M5.Lcd.print(distance);
   M5.Lcd.println("[cm]");
   */
-  if (M5.BtnB.wasPressed()) {
-    servoSet(currentAngle, 90);
-    currentAngle = 90;
+  if (distance <= 5 || M5.BtnB.wasPressed()) {
+    crossingClose();
+    closed = true;
   }
-  if (M5.BtnA.wasPressed()) {
-    servoSet(currentAngle, 0);
-    currentAngle = 0;
+  if (distance > 5 || M5.BtnA.wasPressed()) {
+    crossingOpen();
+    closed = false;
   }
-
+  if (closed) {
+    crossingBlink(blinker);
+    blinker = !(blinker);
+  }
   delay(INTERVAL);
   M5.update();
 
