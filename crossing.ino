@@ -6,7 +6,7 @@
 //
 #include <M5Stack.h>
 //#include <WiFi.h>
-#include <Ultrasonic.h>
+//#include <Ultrasonic.h>
 /*
 #include "AudioFileSourceSD.h"
 #include "AudioFileSourceID3.h"
@@ -20,10 +20,11 @@
 #define LED1_PIN        (16)
 #define LED2_PIN        (17)
 
-Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
+//Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
 bool closed = false;
 bool blinker = false;
 
+int currentAngle = 0;
 // Speaker
 /*
 #define NOTE_D2 330
@@ -79,6 +80,7 @@ void stopMP3()
   }
 }
 */
+/*
 int servoPulse(int angleDegrees)
 {
   int pulseWidth = map(angleDegrees, 0, 180, 544, 2400);
@@ -95,7 +97,42 @@ int servoSet(int angle)
    delayMicroseconds(20000 - pulseWidth);
    return 0;
 }
+*/
+int servoPulse(int angleDegrees)
+{
+  int pulseWidth = map(angleDegrees, 0, 180, 544, 2400);
+  return pulseWidth;
+}
 
+void servoSet(int oldAngle, int newAngle) {
+  int pulseWidth;
+  if (oldAngle == newAngle)
+  { 
+    return;
+  }
+  else if (oldAngle < newAngle)
+  {
+    for (int i = oldAngle; i <= newAngle; i++){
+      pulseWidth = servoPulse(i);
+      digitalWrite(SERVO_PIN, HIGH);
+      delayMicroseconds(pulseWidth);                          
+      digitalWrite(SERVO_PIN, LOW);
+      delayMicroseconds(20000 - pulseWidth);   
+    }
+  }
+  else if (oldAngle > newAngle)
+  {
+    for (int i = oldAngle; i >= newAngle; i--){
+      pulseWidth = servoPulse(i);
+      digitalWrite(SERVO_PIN, HIGH);
+      delayMicroseconds(pulseWidth);                           
+      digitalWrite(SERVO_PIN, LOW);
+      delayMicroseconds(20000 - pulseWidth);
+    }
+  }
+}
+
+/*
 void crossingClose()
 {
   //M5.Lcd.println("Close crossing");
@@ -118,7 +155,7 @@ void crossingOpen()
   //digitalWrite(LED1_PIN, LOW);
   //digitalWrite(LED2_PIN, LOW);
 }
-
+*/
 void crossingBlink(bool blinker) {
   //M5.Speaker.setVolume(0);
   if (blinker) {
@@ -151,12 +188,39 @@ void setup(){
   //digitalWrite(LED2_PIN, LOW);
   M5.Lcd.fillCircle(100, 100, 60, TFT_DARKGREY);
   M5.Lcd.fillCircle(240, 100, 60, TFT_DARKGREY);
-  delay(3000);
+  delay(1000);
   //stopMP3();
 }
+
+
 void loop(){
   long distance;
-  distance = UltrasonicRanger.MeasureInCentimeters();
+  //distance = UltrasonicRanger.MeasureInCentimeters();
+  //distance = 1000;
+  /*
+  M5.Lcd.print(closed);
+  M5.Lcd.print(", ");
+  M5.Lcd.print(distance);
+  M5.Lcd.println("[cm]");
+  */
+  if (M5.BtnB.wasPressed()) {
+    servoSet(currentAngle, 90);
+    currentAngle = 90;
+  }
+  if (M5.BtnA.wasPressed()) {
+    servoSet(currentAngle, 0);
+    currentAngle = 0;
+  }
+
+  delay(INTERVAL);
+  M5.update();
+
+}
+
+
+void loop_old1(){
+  long distance;
+  //distance = UltrasonicRanger.MeasureInCentimeters();
   //distance = 1000;
   /*
   M5.Lcd.print(closed);
@@ -173,7 +237,7 @@ void loop(){
       // Delay prior to open
       delay(1500);
       //stopMP3();
-      crossingOpen();
+      //crossingOpen();
       closed = false;
     }
   }
@@ -181,7 +245,7 @@ void loop(){
     // Close crossing
     if (distance < 5 || M5.BtnC.wasPressed()) {
       //startMP3();
-      crossingClose();
+      //crossingClose();
       closed = true;
     }
   }
