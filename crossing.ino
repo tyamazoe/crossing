@@ -21,10 +21,10 @@
 #define LED2_PIN        (17)
 
 Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
-bool closed = false;
+//bool closed = false;
 bool blinker = false;
-
 int currentAngle = 0;
+
 // Speaker
 /*
 #define NOTE_D2 330
@@ -80,24 +80,6 @@ void stopMP3()
   }
 }
 */
-/*
-int servoPulse(int angleDegrees)
-{
-  int pulseWidth = map(angleDegrees, 0, 180, 544, 2400);
-  return pulseWidth;
-}
-
-int servoSet(int angle)
-{
-   int pulseWidth;
-   pulseWidth = servoPulse(angle);
-   digitalWrite(SERVO_PIN, HIGH);
-   delayMicroseconds(pulseWidth);
-   digitalWrite(SERVO_PIN, LOW);
-   delayMicroseconds(20000 - pulseWidth);
-   return 0;
-}
-*/
 int servoPulse(int angleDegrees)
 {
   int pulseWidth = map(angleDegrees, 0, 180, 544, 2400);
@@ -143,13 +125,14 @@ void crossingClose()
 }
 void crossingOpen()
 {
+  delay(1000);
   servoSet(currentAngle, 0);
   currentAngle = 0;
   //M5.Lcd.fillScreen(BLACK);
   M5.Lcd.fillCircle(100, 100, 50, BLACK);
   M5.Lcd.fillCircle(240, 100, 50, BLACK);
-  //digitalWrite(LED1_PIN, LOW);
-  //digitalWrite(LED2_PIN, LOW);
+  digitalWrite(LED1_PIN, LOW);
+  digitalWrite(LED2_PIN, LOW);
 }
 
 void crossingBlink(bool blinker) {
@@ -158,15 +141,15 @@ void crossingBlink(bool blinker) {
     M5.Lcd.fillCircle(100, 100, 50, RED);
     M5.Lcd.fillCircle(240, 100, 50, BLACK);
     //M5.Speaker.tone(442, 10);
-    //digitalWrite(LED1_PIN, HIGH);
-    //digitalWrite(LED2_PIN, LOW);
+    digitalWrite(LED1_PIN, HIGH);
+    digitalWrite(LED2_PIN, LOW);
   }
   else {
     M5.Lcd.fillCircle(100, 100, 50, BLACK);
     M5.Lcd.fillCircle(240, 100, 50, RED);
     //M5.Speaker.tone(440, 10);
-    //digitalWrite(LED1_PIN, LOW);
-    //digitalWrite(LED2_PIN, HIGH);
+    digitalWrite(LED1_PIN, LOW);
+    digitalWrite(LED2_PIN, HIGH);
   }
 }
 
@@ -178,10 +161,10 @@ void setup(){
   //startMP3();
   
   pinMode(SERVO_PIN, OUTPUT);
-  //pinMode(LED1_PIN, OUTPUT);
-  //pinMode(LED2_PIN, OUTPUT);
-  //digitalWrite(LED1_PIN, LOW);
-  //digitalWrite(LED2_PIN, LOW);
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(LED2_PIN, OUTPUT);
+  digitalWrite(LED1_PIN, LOW);
+  digitalWrite(LED2_PIN, LOW);
   M5.Lcd.fillCircle(100, 100, 60, TFT_DARKGREY);
   M5.Lcd.fillCircle(240, 100, 60, TFT_DARKGREY);
   delay(1000);
@@ -192,63 +175,17 @@ void setup(){
 void loop(){
   long distance;
   distance = UltrasonicRanger.MeasureInCentimeters();
-  //distance = 1000;
-  /*
-  M5.Lcd.print(closed);
-  M5.Lcd.print(", ");
-  M5.Lcd.print(distance);
-  M5.Lcd.println("[cm]");
-  */
+  //M5.Lcd.print(distance);
+  //M5.Lcd.println("[cm]");
+  
   if (distance <= 5 || M5.BtnB.wasPressed()) {
     crossingClose();
-    closed = true;
+    crossingBlink(blinker);
+    blinker = !(blinker);
   }
   if (distance > 5 || M5.BtnA.wasPressed()) {
     crossingOpen();
-    closed = false;
-  }
-  if (closed) {
-    crossingBlink(blinker);
-    blinker = !(blinker);
   }
   delay(INTERVAL);
   M5.update();
-
-}
-
-
-void loop_old1(){
-  long distance;
-  //distance = UltrasonicRanger.MeasureInCentimeters();
-  //distance = 1000;
-  /*
-  M5.Lcd.print(closed);
-  M5.Lcd.print(", ");
-  M5.Lcd.print(distance);
-  M5.Lcd.println("[cm]");
-  */
-  if (closed) {
-    crossingBlink(blinker);
-    blinker = !(blinker);
-    // Open crossing
-    if (distance > 5 || M5.BtnB.wasPressed()) {
-      //M5.Speaker.mute();
-      // Delay prior to open
-      delay(1500);
-      //stopMP3();
-      //crossingOpen();
-      closed = false;
-    }
-  }
-  else {
-    // Close crossing
-    if (distance < 5 || M5.BtnC.wasPressed()) {
-      //startMP3();
-      //crossingClose();
-      closed = true;
-    }
-  }
-  delay(INTERVAL);
-  M5.update();
-
 }
