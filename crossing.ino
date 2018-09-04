@@ -3,9 +3,9 @@
 // 2018-08-21 rev 0.1 initial
 // 2018-08-30 rev 0.2 mp3 working
 // 2018-09-01 rev 0.3 LED blinker
+// 2018-09-04 rev 0.4 add mute
 //
 #include <M5Stack.h>
-//#include <WiFi.h>
 #include <Ultrasonic.h>
 /*
 #include "AudioFileSourceSD.h"
@@ -21,14 +21,12 @@
 #define LED2_PIN        (17)
 
 Ultrasonic UltrasonicRanger(ULTRASONIC_PIN);
-//bool closed = false;
 bool blinker = false;
 int currentAngle = 0;
+bool beepMute = true;
 
 // Speaker
-
 #define NOTE_D2 330
-#define NOTE_D3F 340
 #define NOTE_D3 350
 
 // MP3
@@ -112,7 +110,6 @@ void servoSet(int oldAngle, int newAngle)
   }
 }
 
-
 void crossingClose()
 {
   M5.Lcd.fillCircle(100, 100, 50, RED);
@@ -122,6 +119,7 @@ void crossingClose()
   servoSet(currentAngle, 90);
   currentAngle = 90;
 }
+
 void crossingOpen()
 {
   delay(1000);
@@ -137,7 +135,7 @@ void crossingBlink(bool blinker) {
   if (blinker) {
     M5.Lcd.fillCircle(100, 100, 50, RED);
     M5.Lcd.fillCircle(240, 100, 50, BLACK);
-    M5.Speaker.tone(NOTE_D3, 10);
+    if (!beepMute) M5.Speaker.tone(NOTE_D3, 10);
     digitalWrite(LED1_PIN, HIGH);
     digitalWrite(LED2_PIN, LOW);
   }
@@ -150,7 +148,8 @@ void crossingBlink(bool blinker) {
   }
 }
 
-void setup(){
+void setup() 
+{
   M5.begin();
   //WiFi.mode(WIFI_OFF); 
   delay(500);
@@ -165,17 +164,20 @@ void setup(){
   digitalWrite(LED2_PIN, LOW);
   M5.Lcd.fillCircle(100, 100, 60, TFT_DARKGREY);
   M5.Lcd.fillCircle(240, 100, 60, TFT_DARKGREY);
-  delay(1000);
+  delay(500);
+  //servoSet(45, currentAngle);
+  delay(500);
   //stopMP3();
 }
 
-
-void loop(){
+void loop()
+{
   long distance;
   distance = UltrasonicRanger.MeasureInCentimeters();
   //M5.Lcd.print(distance);
   //M5.Lcd.println("[cm]");
-  
+  Serial.printf("%d [cm]\n", distance);
+ 
   if (distance <= 5 || M5.BtnB.wasPressed()) {
     crossingClose();
     crossingBlink(blinker);
@@ -183,6 +185,9 @@ void loop(){
   }
   if (distance > 5 || M5.BtnA.wasPressed()) {
     crossingOpen();
+  }
+  if (M5.BtnC.wasPressed()) {
+    beepMute = !(beepMute);
   }
   delay(INTERVAL);
   M5.update();
