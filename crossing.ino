@@ -7,12 +7,6 @@
 //
 #include <M5Stack.h>
 #include <Ultrasonic.h>
-/*
-#include "AudioFileSourceSD.h"
-#include "AudioFileSourceID3.h"
-#include "AudioGeneratorMP3.h"
-#include "AudioOutputI2S.h"
-*/
 
 #define ULTRASONIC_PIN  (22)
 #define INTERVAL        (300)
@@ -29,55 +23,6 @@ bool beepMute = true;
 #define NOTE_D2 330
 #define NOTE_D3 350
 
-// MP3
-/*
-AudioGeneratorMP3 *mp3;
-AudioFileSourceSD *file;
-AudioOutputI2S *out;
-AudioFileSourceID3 *id3;
-*/
-/*
-void setupMP3() 
-{
-  //mp3->begin(id3, out);
-}
-void startMP3()
-{
-  if (!mp3 || !mp3->isRunning()) {
-    M5.Lcd.print("play MP3");
-    file = new AudioFileSourceSD("/pno-cs.mp3");
-    id3 = new AudioFileSourceID3(file);
-    out = new AudioOutputI2S(0, 1); // Output to builtInDAC
-    out->SetOutputModeMono(true);
-    mp3 = new AudioGeneratorMP3();
-    mp3->begin(id3, out);    
-  }
-}
-void stopMP3()
-{
-  if (mp3) {
-    M5.Lcd.print("stop MP3 ");
-    mp3->stop();
-    //delete mp3;
-    //mp3 = NULL;
-  }
-  if (out) {
-    //out->close();
-    delete out;
-    out = NULL;
-  }
-  if (id3) {
-    id3->close();
-    delete id3;
-    id3 = NULL;
-  }
-  if (file) {
-    file->close();
-    delete file;
-    file = NULL;
-  }
-}
-*/
 int servoPulse(int angleDegrees)
 {
   int pulseWidth = map(angleDegrees, 0, 180, 544, 2400);
@@ -151,10 +96,7 @@ void crossingBlink(bool blinker) {
 void setup() 
 {
   M5.begin();
-  //WiFi.mode(WIFI_OFF); 
   delay(500);
-  //setupMP3();
-  //startMP3();
   M5.Speaker.setVolume(0);
   
   pinMode(SERVO_PIN, OUTPUT);
@@ -167,7 +109,6 @@ void setup()
   delay(500);
   //servoSet(45, currentAngle);
   delay(500);
-  //stopMP3();
 }
 
 void loop()
